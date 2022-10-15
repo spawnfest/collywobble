@@ -1,5 +1,5 @@
-defmodule CollywobbleWeb.PageControllerTest do
-  use CollywobbleWeb.ConnCase
+defmodule Web.PageControllerTest do
+  use Test.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")

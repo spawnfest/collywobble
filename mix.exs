@@ -1,10 +1,10 @@
-defmodule Collywobble.MixProject do
+defmodule Core.MixProject do
   use Mix.Project
 
   def application do
     [
       extra_applications: [:logger, :runtime_tools],
-      mod: {Collywobble.Application, []}
+      mod: {Core.Application, []}
     ]
   end
 

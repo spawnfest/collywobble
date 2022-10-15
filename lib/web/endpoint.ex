@@ -1,4 +1,4 @@
-defmodule CollywobbleWeb.Endpoint do
+defmodule Web.Endpoint do
   use Phoenix.Endpoint, otp_app: :collywobble
 
   @session_options [
@@ -37,5 +37,5 @@ defmodule CollywobbleWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug CollywobbleWeb.Router
+  plug Web.Router
 end

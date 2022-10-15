@@ -1,5 +1,5 @@
-defmodule CollywobbleWeb.ErrorView do
-  use CollywobbleWeb, :view
+defmodule Web.ErrorView do
+  use Web, :view
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

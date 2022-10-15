@@ -1,4 +1,4 @@
-defmodule CollywobbleWeb.ConnCase do
+defmodule Test.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule CollywobbleWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use CollywobbleWeb.ConnCase, async: true`, although
+  by setting `use Web.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -22,17 +22,17 @@ defmodule CollywobbleWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import CollywobbleWeb.ConnCase
+      import Test.ConnCase
 
-      alias CollywobbleWeb.Router.Helpers, as: Routes
+      alias Web.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      @endpoint CollywobbleWeb.Endpoint
+      @endpoint Web.Endpoint
     end
   end
 
   setup tags do
-    Collywobble.DataCase.setup_sandbox(tags)
+    Test.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

@@ -8,13 +8,13 @@
 import Config
 
 config :collywobble,
-  ecto_repos: [Collywobble.Repo]
+  ecto_repos: [Core.Repo]
 
 # Configures the endpoint
-config :collywobble, CollywobbleWeb.Endpoint,
+config :collywobble, Web.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: CollywobbleWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: Collywobble.PubSub,
+  render_errors: [view: Web.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: Core.PubSub,
   live_view: [signing_salt: "NicxWh0m"]
 
 # Configures the mailer
@@ -24,7 +24,7 @@ config :collywobble, CollywobbleWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :collywobble, Collywobble.Mailer, adapter: Swoosh.Adapters.Local
+config :collywobble, Core.Mailer, adapter: Swoosh.Adapters.Local
 
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false

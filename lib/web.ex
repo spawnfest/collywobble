@@ -1,12 +1,12 @@
-defmodule CollywobbleWeb do
+defmodule Web do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use CollywobbleWeb, :controller
-      use CollywobbleWeb, :view
+      use Web, :controller
+      use Web, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -19,19 +19,19 @@ defmodule CollywobbleWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: CollywobbleWeb
+      use Phoenix.Controller, namespace: Web
 
       import Plug.Conn
-      import CollywobbleWeb.Gettext
-      alias CollywobbleWeb.Router.Helpers, as: Routes
+      import Web.Gettext
+      alias Web.Router.Helpers, as: Routes
     end
   end
 
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/collywobble_web/templates",
-        namespace: CollywobbleWeb
+        root: "lib/web/templates",
+        namespace: Web
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
@@ -45,7 +45,7 @@ defmodule CollywobbleWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {CollywobbleWeb.LayoutView, "live.html"}
+        layout: {Web.LayoutView, "live.html"}
 
       unquote(view_helpers())
     end
@@ -80,7 +80,7 @@ defmodule CollywobbleWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import CollywobbleWeb.Gettext
+      import Web.Gettext
     end
   end
 
@@ -95,9 +95,9 @@ defmodule CollywobbleWeb do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
-      import CollywobbleWeb.ErrorHelpers
-      import CollywobbleWeb.Gettext
-      alias CollywobbleWeb.Router.Helpers, as: Routes
+      import Web.ErrorHelpers
+      import Web.Gettext
+      alias Web.Router.Helpers, as: Routes
     end
   end
 
