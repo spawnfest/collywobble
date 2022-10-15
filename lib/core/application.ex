@@ -9,7 +9,8 @@ defmodule Core.Application do
       Core.Repo,
       Web.Telemetry,
       {Phoenix.PubSub, name: Core.PubSub},
-      Web.Endpoint
+      Web.Endpoint,
+      {Registry, keys: :unique, name: Registry.Pads}
     ]
 
     opts = [strategy: :one_for_one, name: Core.Supervisor]
