@@ -43,6 +43,7 @@ defmodule Core.MixProject do
       {:gettext, "~> 0.18"},
       {:html_query, "~> 0.1", only: :test},
       {:jason, "~> 1.2"},
+      {:moar, "~> 1.19"},
       {:mix_audit, "~> 2.0", runtime: false},
       {:pages, "~> 0.5", only: :test},
       {:phoenix, "~> 1.6.14"},

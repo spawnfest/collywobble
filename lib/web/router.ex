@@ -17,7 +17,8 @@ defmodule Web.Router do
   scope "/" do
     pipe_through :browser
 
-    get "/", Web.PageController, :index
+    live "/", Web.HomeLive, :home
+    live "/pad/:pad_id", Web.PadLive, :pad
   end
 
   if Mix.env() in [:dev, :test] do

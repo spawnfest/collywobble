@@ -35,4 +35,22 @@ defmodule Test.ConnCase do
     Test.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  setup %{conn: conn} = tags do
+    page_ids = Map.get(tags, :page, [])
+
+    pages =
+      page_ids
+      |> List.wrap()
+      |> Enum.map(fn page_id ->
+        page =
+          conn
+          |> Pages.new()
+
+        {page_id, page}
+      end)
+      |> Map.new()
+
+    [pages: pages]
+  end
 end

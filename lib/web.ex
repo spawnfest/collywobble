@@ -33,11 +33,9 @@ defmodule Web do
         root: "lib/web/templates",
         namespace: Web
 
-      # Import convenience functions from controllers
       import Phoenix.Controller,
         only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
 
-      # Include shared imports and aliases for views
       unquote(view_helpers())
     end
   end
@@ -61,7 +59,7 @@ defmodule Web do
 
   def component do
     quote do
-      use Phoenix.Component
+      use Phoenix.Component, global_prefixes: ~w[test-]
 
       unquote(view_helpers())
     end
@@ -86,15 +84,10 @@ defmodule Web do
 
   defp view_helpers do
     quote do
-      # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
-
-      # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
-      import Phoenix.Component
-
-      # Import basic rendering functionality (render, render_layout, etc)
+      use Phoenix.Component, global_prefixes: ~w[test-]
+      import Moar.Sugar
       import Phoenix.View
-
       import Web.ErrorHelpers
       import Web.Gettext
       alias Web.Router.Helpers, as: Routes
