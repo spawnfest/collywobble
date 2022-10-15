@@ -10,9 +10,7 @@ defmodule Web.PadLive do
     ~H"""
     <div test-pad-id={@pad_id}>
       <div>this thing: <%= @pad_id %></div>
-      <.form :let={f} for={:pad} phx-change="edit-pad" test-role="pad-form">
-        <%= textarea f, :text, value: @text %>
-      </.form>
+      <div id="editable-content" contenteditable="true" phx-update="ignore" phx-hook="ContentEditable"><%= fetch_text(@server) %></div>
     </div>
     """
   end
@@ -29,7 +27,7 @@ defmodule Web.PadLive do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("edit-pad", %{"pad" => %{"text" => text}}, socket) do
+  def handle_event("edit-pad", %{"text" => text}, socket) do
     Core.PadServer.set_text(socket.assigns.server, text)
 
     socket
@@ -39,7 +37,7 @@ defmodule Web.PadLive do
   @impl Phoenix.LiveView
   def handle_info({:pad_update, text}, socket) do
     socket
-    |> assign(text: text)
+    |> push_event("updated-content", %{text: text})
     |> noreply()
   end
 end

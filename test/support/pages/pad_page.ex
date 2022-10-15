@@ -1,6 +1,8 @@
 defmodule Test.Pages.PadPage do
+  import ExUnit.Assertions
   import Moar.Assertions
   alias HtmlQuery, as: Hq
+  require Phoenix.LiveViewTest
 
   @spec visit(Pages.Driver.t(), pad_id: binary) :: Pages.Driver.t()
   def visit(page, pad_id: pad_id),
@@ -19,15 +21,26 @@ defmodule Test.Pages.PadPage do
 
   @spec enter_text(Pages.Driver.t(), binary()) :: Pages.Driver.t()
   def enter_text(page, text) do
-    page
-    |> Pages.update_form("[test-role=pad-form]", :pad, %{text: text})
+    rendered =
+      page.live
+      |> Phoenix.LiveViewTest.render_hook("edit-pad", %{text: text})
+
+    Pages.Driver.LiveView.new(page.conn, {:ok, page.live, rendered})
   end
 
   @spec assert_text(Pages.Driver.t(), binary()) :: Pages.Driver.t()
   def assert_text(page, text) do
     page
-    |> Hq.find!("textarea")
+    |> Hq.find!("#editable-content")
     |> Hq.text()
     |> assert_eq(text, returning: page)
+  end
+
+  @spec assert_text_sent_to_client(Pages.Driver.t(), binary()) :: Pages.Driver.t()
+  def assert_text_sent_to_client(page, text) do
+    page.live
+    |> Phoenix.LiveViewTest.assert_push_event("updated-content", %{text: ^text})
+
+    page
   end
 end

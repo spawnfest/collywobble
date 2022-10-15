@@ -11,7 +11,7 @@ defmodule Web.PadLiveTest do
       |> Test.Pages.PadPage.assert_here(id: pad_id)
       |> Test.Pages.PadPage.enter_text("Hello Bob")
       |> Pages.rerender()
-      |> Test.Pages.PadPage.assert_text("Hello Bob")
+      |> Test.Pages.PadPage.assert_text_sent_to_client("Hello Bob")
 
       bob_page
       |> Test.Pages.PadPage.visit(pad_id: pad_id)
