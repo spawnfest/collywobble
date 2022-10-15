@@ -1,24 +1,26 @@
 defmodule Test.Core.PadServerTest do
   use Test.SimpleCase
 
+  setup do: [pad_id: Core.Random.string(10)]
+
   describe "pid_for_pad_id" do
-    test "when there is no GenServer for the pad_id" do
-      pid = Core.PadServer.pid_for_pad_id("test123")
+    test "when there is no GenServer for the pad_id", %{pad_id: pad_id} do
+      pid = Core.PadServer.pid_for_pad_id(pad_id)
       assert is_pid(pid)
       GenServer.stop(pid, :normal)
     end
 
-    test "when there is GenServer for the pad_id" do
-      {:ok, server} = start_supervised({Core.PadServer, "test123"})
-      pid = Core.PadServer.pid_for_pad_id("test123")
+    test "when there is GenServer for the pad_id", %{pad_id: pad_id} do
+      {:ok, server} = start_supervised({Core.PadServer, pad_id})
+      pid = Core.PadServer.pid_for_pad_id(pad_id)
 
       assert pid == server
     end
   end
 
   describe "server state" do
-    setup do
-      {:ok, server} = start_supervised({Core.PadServer, "pad1"})
+    setup %{pad_id: pad_id} do
+      {:ok, server} = start_supervised({Core.PadServer, pad_id})
       [server: server]
     end
 
@@ -26,8 +28,8 @@ defmodule Test.Core.PadServerTest do
       assert Core.PadServer.get_text(server) == ""
     end
 
-    test "sets new text and notifies subscribers", %{server: server} do
-      Phoenix.PubSub.subscribe(Core.PubSub, "pad1")
+    test "sets new text and notifies subscribers", %{pad_id: pad_id, server: server} do
+      Phoenix.PubSub.subscribe(Core.PubSub, pad_id)
 
       Core.PadServer.set_text(server, "Test")
       assert Core.PadServer.get_text(server) == "Test"

@@ -17,6 +17,7 @@ defmodule Test.Pages.PadPage do
     |> assert_eq(pad_id, returning: page)
   end
 
+  @spec enter_text(Pages.Driver.t(), binary()) :: Pages.Driver.t()
   def enter_text(page, text) do
     page
     |> Pages.update_form("[test-role=pad-form]", :pad, %{text: text})
