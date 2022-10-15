@@ -28,12 +28,30 @@ import topbar from "../vendor/topbar"
 
 let Hooks = {}
 Hooks.ContentEditable = {
-  updateTarget(e) {
+  sendLocalUpdates(e) {
     this.pushEvent("edit-pad", {text: this.el.innerText})
   },
   mounted() {
-    this.handleEvent("updated-content", ({text}) => this.el.innerText = text)
-    this.el.addEventListener("input", this.updateTarget.bind(this), false)
+    this.handleEvent("updated-content", this.updateContent.bind(this))
+    this.el.addEventListener("input", this.sendLocalUpdates.bind(this), false)
+  },
+  updateContent({text}) {
+    let sel = window.getSelection()
+    let focusOffset = sel.focusOffset
+    let currentNode = sel.focusNode
+    let currentNodeCount = Array.from(this.el.childNodes).findIndex((element) => {
+      return element == currentNode
+    })
+
+    this.el.innerText = text
+
+    let range = document.createRange()
+    range.setStart(this.el.childNodes[currentNodeCount], focusOffset)
+    range.collapse(true)
+
+    sel = window.getSelection()
+    if (sel.rangeCount > 0) sel.removeAllRanges();
+    sel.addRange(range)
   }
 }
 
