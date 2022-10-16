@@ -28,14 +28,15 @@ defmodule Test.Pages.PadPage do
     Pages.Driver.LiveView.new(page.conn, {:ok, page.live, rendered})
   end
 
-  @spec set_cursor(Pages.Driver.t(), integer(), integer(), integer()) :: Pages.Driver.t()
-  def set_cursor(page, anchor_offset, focus_offset, node) do
+  @spec set_cursor(Pages.Driver.t(), integer(), integer(), integer(), integer()) :: Pages.Driver.t()
+  def set_cursor(page, anchor_offset, focus_offset, anchor_node, focus_node) do
     rendered =
       page.live
       |> Phoenix.LiveViewTest.render_hook("update-cursor", %{
         anchor_offset: anchor_offset,
         focus_offset: focus_offset,
-        node: node
+        anchor_node: anchor_node,
+        focus_node: focus_node
       })
 
     Pages.Driver.LiveView.new(page.conn, {:ok, page.live, rendered})
@@ -62,7 +63,8 @@ defmodule Test.Pages.PadPage do
     page.live
     |> Phoenix.LiveViewTest.assert_push_event("updated-cursors", %{cursors: actual_cursors})
 
-    assert Enum.map(actual_cursors, &Map.take(&1, [:anchor_offset, :focus_offset, :node])) == expected_cursors
+    assert Enum.map(actual_cursors, &Map.take(&1, [:anchor_offset, :focus_offset, :anchor_node, :focus_node])) ==
+             expected_cursors
 
     page
   end

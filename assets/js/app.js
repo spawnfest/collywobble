@@ -40,12 +40,14 @@ function getCursorPosition(el) {
   let sel = window.getSelection()
   let anchorOffset = sel.anchorOffset
   let focusOffset = sel.focusOffset
-  let currentNode = sel.focusNode
-  let currentNodeCount = Array.from(el.childNodes).findIndex((element) => {
-    return element == currentNode
+  let anchorNodeIndex = Array.from(el.childNodes).findIndex((element) => {
+    return element == sel.anchorNode
+  })
+  let focusNodeIndex = Array.from(el.childNodes).findIndex((element) => {
+    return element == sel.focusNode
   })
 
-  return [anchorOffset, focusOffset, currentNodeCount]
+  return [anchorOffset, focusOffset, anchorNodeIndex, focusNodeIndex]
 }
 
 function sortById(a, b) {
@@ -67,8 +69,8 @@ Hooks.ContentEditable = {
     this.pushEvent("edit-pad", {text: this.el.innerText})
   },
   sendCursorUpdates(e) {
-    let [anchorOffset, focusOffset, currentNodeCount] = getCursorPosition(this.el)
-    this.pushEvent("update-cursor", {anchor_offset: anchorOffset, focus_offset: focusOffset, node: currentNodeCount})
+    let [anchorOffset, focusOffset, anchorNodeIndex, focusNodeIndex] = getCursorPosition(this.el)
+    this.pushEvent("update-cursor", {anchor_offset: anchorOffset, focus_offset: focusOffset, anchor_node: anchorNodeIndex, focus_node: focusNodeIndex})
   },
   mounted() {
     this.handleEvent("updated-content", this.updateContent.bind(this))
@@ -79,16 +81,24 @@ Hooks.ContentEditable = {
     setInterval(this.renderCursors.bind(this), 250)
   },
   updateContent({text}) {
-    let [anchorOffset, focusOffset, currentNodeCount] = getCursorPosition(this.el)
+    let [anchorOffset, focusOffset, anchorNodeIndex, focusNodeIndex] = getCursorPosition(this.el)
 
     this.el.innerText = text
 
     let range = document.createRange()
 
-    if (currentNodeCount < 0 || currentNodeCount >= this.el.childNodes.length) currentNodeCount = 0
-    let currentNode = this.el.childNodes[currentNodeCount]
-    range.setStart(currentNode, Math.min(focusOffset, currentNode.length))
-    range.setEnd(currentNode, Math.min(anchorOffset, currentNode.length))
+    if (anchorNodeIndex < 0 || anchorNodeIndex >= this.el.childNodes.length) anchorNodeIndex = 0
+    let anchorNode = this.el.childNodes[anchorNodeIndex]
+
+    if (focusNodeIndex < 0 || focusNodeIndex >= this.el.childNodes.length) focusNodeIndex = 0
+    let focusNode = this.el.childNodes[focusNodeIndex]
+
+    let anchorPosition = [anchorNode, Math.min(anchorOffset, anchorNode.length)]
+    let focusPosition = [focusNode, Math.min(focusOffset, focusNode.length)]
+    let positions = {true: anchorPosition, false: focusPosition}
+
+    range.setStart(...positions[anchorNodeIndex < focusNodeIndex])
+    range.setEnd(...positions[anchorNodeIndex > focusNodeIndex])
 
     sel = window.getSelection()
     if (sel.rangeCount > 0) sel.removeAllRanges();
@@ -97,24 +107,32 @@ Hooks.ContentEditable = {
   renderCursors() {
     document.querySelectorAll(".caret").forEach(el => el.remove())
 
-    this.cursors.forEach(({anchor_offset, focus_offset, node}, index) => {
-      if (node < 0 || node >= this.el.childNodes.length) return
+    this.cursors.forEach(({anchor_offset, focus_offset, anchor_node, focus_node}, index) => {
+      // TODO: do all this w/ anchor node too
+      if (anchor_node < 0 || anchor_node >= this.el.childNodes.length) return
+      if (focus_node < 0 || focus_node >= this.el.childNodes.length) return
 
-      let childNode = this.el.childNodes[node]
+      let anchorNode = this.el.childNodes[anchor_node]
+      let focusNode = this.el.childNodes[focus_node]
+
       let range = document.createRange()
-      let ends = [anchor_offset, focus_offset]
 
-      range.setStart(childNode, Math.min(...ends, childNode.length))
-      range.setEnd(childNode, Math.min(Math.max(...ends), childNode.length))
-      let rect = range.getBoundingClientRect()
-      let div = document.createElement("div")
-      div.style.height = `${rect.height}px`
-      div.style.width = `${rect.width+1}px`
-      div.style.left = `${rect.x-1}px`
-      div.style.top = `${rect.y}px`
-      div.style.backgroundColor = colors[index % colors.length]
-      div.classList.add("caret")
-      document.querySelector("body").appendChild(div);
+      range.setStart(anchorNode, Math.min(anchor_offset, anchorNode.length))
+      range.setEnd(focusNode, Math.min(focus_offset, focusNode.length))
+      let rectList = range.getClientRects()
+
+      for(let i = 0; i < rectList.length; i++) {
+        let rect = rectList.item(i)
+
+        let div = document.createElement("div")
+        div.style.height = `${rect.height}px`
+        div.style.width = `${rect.width+1}px`
+        div.style.left = `${rect.x-1}px`
+        div.style.top = `${rect.y}px`
+        div.style.backgroundColor = colors[index % colors.length]
+        div.classList.add("caret")
+        document.querySelector("body").appendChild(div);
+      }
     })
   },
   updateCursors({cursors}) {

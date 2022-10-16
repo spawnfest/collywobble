@@ -7,7 +7,6 @@ defmodule Web.PadLive do
     <div test-pad-id={@pad_id}>
       <div>this thing: <%= @pad_id %></div>
       <div id="editable-content" contenteditable="true" phx-update="ignore" phx-hook="ContentEditable"><%= fetch_text(@server) %></div>
-      <.link navigate={Routes.home_path(Web.Endpoint, :home)}>go back</.link>
     </div>
     """
   end
@@ -36,10 +35,22 @@ defmodule Web.PadLive do
   @impl Phoenix.LiveView
   def handle_event(
         "update-cursor",
-        %{"anchor_offset" => anchor_offset, "focus_offset" => focus_offset, "node" => node},
+        %{
+          "anchor_offset" => anchor_offset,
+          "focus_offset" => focus_offset,
+          "anchor_node" => anchor_node,
+          "focus_node" => focus_node
+        },
         socket
       ) do
-    Core.PadServer.set_cursor(socket.assigns.server, socket.assigns.local_id, anchor_offset, focus_offset, node)
+    Core.PadServer.set_cursor(
+      socket.assigns.server,
+      socket.assigns.local_id,
+      anchor_offset,
+      focus_offset,
+      anchor_node,
+      focus_node
+    )
 
     socket
     |> noreply()

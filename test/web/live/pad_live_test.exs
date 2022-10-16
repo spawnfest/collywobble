@@ -28,10 +28,12 @@ defmodule Web.PadLiveTest do
       bob_page
       |> Test.Pages.PadPage.visit(pad_id: pad_id)
       |> Test.Pages.PadPage.assert_cursors_sent_to_client([])
-      |> Test.Pages.PadPage.set_cursor(1, 2, 3)
+      |> Test.Pages.PadPage.set_cursor(1, 2, 3, 4)
 
       alice_page
-      |> Test.Pages.PadPage.assert_cursors_sent_to_client([%{anchor_offset: 1, focus_offset: 2, node: 3}])
+      |> Test.Pages.PadPage.assert_cursors_sent_to_client([
+        %{anchor_offset: 1, focus_offset: 2, anchor_node: 3, focus_node: 4}
+      ])
     end
 
     test "registers w/ the server and gets notified when other users leave", %{
@@ -42,12 +44,14 @@ defmodule Web.PadLiveTest do
         alice_page
         |> Test.Pages.PadPage.visit(pad_id: pad_id)
         |> Test.Pages.PadPage.enter_text("Hello Bob")
-        |> Test.Pages.PadPage.set_cursor(1, 2, 3)
+        |> Test.Pages.PadPage.set_cursor(1, 2, 3, 4)
 
       bob_page =
         bob_page
         |> Test.Pages.PadPage.visit(pad_id: pad_id)
-        |> Test.Pages.PadPage.assert_cursors_sent_to_client([%{anchor_offset: 1, focus_offset: 2, node: 3}])
+        |> Test.Pages.PadPage.assert_cursors_sent_to_client([
+          %{anchor_offset: 1, focus_offset: 2, anchor_node: 3, focus_node: 4}
+        ])
 
       Process.exit(alice_page.live.pid, :kill)
 

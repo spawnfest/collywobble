@@ -6,7 +6,8 @@
 }
 
 .caret {
-	position: absolute;
-	width: 2px;
+  opacity: 70%;
+  position: absolute;
+  width: 2px;
   z-index: -1;
 }

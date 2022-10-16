@@ -43,14 +43,23 @@ defmodule Test.Core.PadServerTest do
     test "sets new cursor position and notifies subscriber", %{pad_id: pad_id, server: server} do
       Phoenix.PubSub.subscribe(Core.PubSub, pad_id)
 
-      Core.PadServer.set_cursor(server, "from-test-process", 1, 2, 3)
+      Core.PadServer.set_cursor(server, "from-test-process", 1, 2, 3, 4)
       pid = self()
 
       assert Core.PadServer.get_cursors(server) == %{
-               pid => %{id: "from-test-process", anchor_offset: 1, focus_offset: 2, node: 3}
+               pid => %{id: "from-test-process", anchor_offset: 1, focus_offset: 2, anchor_node: 3, focus_node: 4}
              }
 
-      assert_receive {:cursor_update, %{^pid => %{id: "from-test-process", anchor_offset: 1, focus_offset: 2, node: 3}}}
+      assert_receive {:cursor_update,
+                      %{
+                        ^pid => %{
+                          id: "from-test-process",
+                          anchor_offset: 1,
+                          focus_offset: 2,
+                          anchor_node: 3,
+                          focus_node: 4
+                        }
+                      }}
     end
 
     test "monitors client processes", %{pad_id: pad_id, server: server} do
@@ -59,7 +68,7 @@ defmodule Test.Core.PadServerTest do
       pid =
         spawn(fn ->
           Process.flag(:trap_exit, true)
-          Core.PadServer.set_cursor(server, "from-process", 1, 2, 3)
+          Core.PadServer.set_cursor(server, "from-process", 1, 2, 3, 4)
           send(test_pid, :cursors_set)
 
           receive do
@@ -70,7 +79,7 @@ defmodule Test.Core.PadServerTest do
       assert_receive :cursors_set
 
       assert Core.PadServer.get_cursors(server) == %{
-               pid => %{id: "from-process", anchor_offset: 1, focus_offset: 2, node: 3}
+               pid => %{id: "from-process", anchor_offset: 1, focus_offset: 2, anchor_node: 3, focus_node: 4}
              }
 
       Phoenix.PubSub.subscribe(Core.PubSub, pad_id)

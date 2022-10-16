@@ -30,8 +30,8 @@ defmodule Core.PadServer do
     GenServer.call(pid, {:set_text, text})
   end
 
-  def set_cursor(pid, id, anchor_offset, focus_offset, node) do
-    GenServer.call(pid, {:set_cursor, self(), id, anchor_offset, focus_offset, node})
+  def set_cursor(pid, id, anchor_offset, focus_offset, anchor_node, focus_node) do
+    GenServer.call(pid, {:set_cursor, self(), id, anchor_offset, focus_offset, anchor_node, focus_node})
   end
 
   ## Callbacks
@@ -59,10 +59,16 @@ defmodule Core.PadServer do
   end
 
   @impl true
-  def handle_call({:set_cursor, view_pid, id, anchor_offset, focus_offset, node}, _from, state) do
+  def handle_call({:set_cursor, view_pid, id, anchor_offset, focus_offset, anchor_node, focus_node}, _from, state) do
     new_cursors =
       state.cursors
-      |> Map.put(view_pid, %{id: id, anchor_offset: anchor_offset, focus_offset: focus_offset, node: node})
+      |> Map.put(view_pid, %{
+        id: id,
+        anchor_offset: anchor_offset,
+        focus_offset: focus_offset,
+        anchor_node: anchor_node,
+        focus_node: focus_node
+      })
 
     Phoenix.PubSub.broadcast(Core.PubSub, state.pad_id, {:cursor_update, new_cursors})
 
