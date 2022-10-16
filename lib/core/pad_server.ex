@@ -1,6 +1,8 @@
 defmodule Core.PadServer do
   use GenServer
 
+  defstruct [:pad_id, text: "", cursors: %{}]
+
   def start_link(pad_id) do
     GenServer.start_link(__MODULE__, pad_id, name: {:via, Registry, {Registry.Pads, pad_id}})
   end
@@ -37,29 +39,29 @@ defmodule Core.PadServer do
   @impl true
   def init(pad_id) do
     Registry.register(Registry.Pads, pad_id, nil)
-    {:ok, {pad_id, "", %{}}}
+    {:ok, __struct__(pad_id: pad_id)}
   end
 
   @impl true
-  def handle_call(:get_text, _from, {pad_id, text, cursors}) do
-    {:reply, text, {pad_id, text, cursors}}
+  def handle_call(:get_text, _from, %{text: text} = state) do
+    {:reply, text, state}
   end
 
   @impl true
-  def handle_call(:get_cursors, _from, {pad_id, text, cursors}) do
-    {:reply, cursors, {pad_id, text, cursors}}
+  def handle_call(:get_cursors, _from, %{cursors: cursors} = state) do
+    {:reply, cursors, state}
   end
 
   @impl true
-  def handle_call({:set_text, new_text}, _from, {pad_id, _text, cursors}) do
-    Phoenix.PubSub.broadcast(Core.PubSub, pad_id, {:pad_update, new_text})
-    {:reply, :ok, {pad_id, new_text, cursors}}
+  def handle_call({:set_text, new_text}, _from, state) do
+    Phoenix.PubSub.broadcast(Core.PubSub, state.pad_id, {:pad_update, new_text})
+    {:reply, :ok, %{state | text: new_text}}
   end
 
   @impl true
-  def handle_call({:set_cursor, view_pid, offset, node}, _from, {pad_id, text, cursors}) do
-    new_cursors = cursors |> Map.put(view_pid, %{offset: offset, node: node})
-    Phoenix.PubSub.broadcast(Core.PubSub, pad_id, {:cursor_update, new_cursors})
-    {:reply, :ok, {pad_id, text, new_cursors}}
+  def handle_call({:set_cursor, view_pid, offset, node}, _from, state) do
+    new_cursors = state.cursors |> Map.put(view_pid, %{offset: offset, node: node})
+    Phoenix.PubSub.broadcast(Core.PubSub, state.pad_id, {:cursor_update, new_cursors})
+    {:reply, :ok, %{state | cursors: new_cursors}}
   end
 end
