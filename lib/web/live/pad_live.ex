@@ -1,14 +1,6 @@
 defmodule Web.PadLive do
   use Web, :live_view
 
-  def fetch_text(server) do
-    Core.PadServer.get_text(server)
-  end
-
-  def fetch_cursors(server) do
-    Core.PadServer.get_cursors(server)
-  end
-
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
@@ -20,12 +12,6 @@ defmodule Web.PadLive do
     """
   end
 
-  def push_cursors(socket, server) do
-    if connected?(socket) do
-      send(self(), {:cursor_update, fetch_cursors(server)})
-    end
-  end
-
   @impl Phoenix.LiveView
   def mount(%{"pad_id" => pad_id}, _assigns, socket) do
     server = Core.PadServer.pid_for_pad_id(pad_id)
@@ -35,7 +21,7 @@ defmodule Web.PadLive do
     push_cursors(socket, server)
 
     socket
-    |> assign(page_id: "pad", pad_id: pad_id, server: server, text: fetch_text(server))
+    |> assign(local_id: Core.Random.string(4), page_id: "pad", pad_id: pad_id, server: server, text: fetch_text(server))
     |> ok()
   end
 
@@ -49,7 +35,7 @@ defmodule Web.PadLive do
 
   @impl Phoenix.LiveView
   def handle_event("update-cursor", %{"offset" => offset, "node" => node}, socket) do
-    Core.PadServer.set_cursor(socket.assigns.server, offset, node)
+    Core.PadServer.set_cursor(socket.assigns.server, socket.assigns.local_id, offset, node)
 
     socket
     |> noreply()
@@ -72,5 +58,21 @@ defmodule Web.PadLive do
     socket
     |> push_event("updated-cursors", %{cursors: other_cursors})
     |> noreply()
+  end
+
+  ########
+
+  defp fetch_text(server) do
+    Core.PadServer.get_text(server)
+  end
+
+  defp fetch_cursors(server) do
+    Core.PadServer.get_cursors(server)
+  end
+
+  defp push_cursors(socket, server) do
+    if connected?(socket) do
+      send(self(), {:cursor_update, fetch_cursors(server)})
+    end
   end
 end

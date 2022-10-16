@@ -22,10 +22,12 @@ defmodule Web.PadLiveTest do
       alice_page =
         alice_page
         |> Test.Pages.PadPage.visit(pad_id: pad_id)
+        |> Test.Pages.PadPage.assert_cursors_sent_to_client([])
         |> Test.Pages.PadPage.enter_text("Hello Bob")
 
       bob_page
       |> Test.Pages.PadPage.visit(pad_id: pad_id)
+      |> Test.Pages.PadPage.assert_cursors_sent_to_client([])
       |> Test.Pages.PadPage.set_cursor(2, 3)
 
       alice_page

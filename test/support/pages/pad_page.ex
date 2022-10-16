@@ -54,9 +54,11 @@ defmodule Test.Pages.PadPage do
   end
 
   @spec assert_cursors_sent_to_client(Pages.Driver.t(), [map()]) :: Pages.Driver.t()
-  def assert_cursors_sent_to_client(page, cursors) do
+  def assert_cursors_sent_to_client(page, expected_cursors) do
     page.live
-    |> Phoenix.LiveViewTest.assert_push_event("updated-cursors", %{cursors: ^cursors})
+    |> Phoenix.LiveViewTest.assert_push_event("updated-cursors", %{cursors: actual_cursors})
+
+    assert Enum.map(actual_cursors, &Map.take(&1, [:offset, :node])) == expected_cursors
 
     page
   end
