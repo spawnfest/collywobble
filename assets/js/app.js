@@ -26,6 +26,16 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+const colors = [
+  "#B28DFF",
+  "#85E3FF",
+  "#FFABAB",
+  "#6EB5FF",
+  "#F6A6FF",
+  "#FFF5BA",
+  "#AFCBFF"
+]
+
 function getCursorPosition(el) {
   let sel = window.getSelection()
   let focusOffset = sel.focusOffset
@@ -35,6 +45,10 @@ function getCursorPosition(el) {
   })
 
   return [focusOffset, currentNodeCount]
+}
+
+function sortById(a, b) {
+  (a.id > b.id) - (a.id < b.id)
 }
 
 let Hooks = {}
@@ -68,7 +82,7 @@ Hooks.ContentEditable = {
   updateCursors({cursors}) {
     document.querySelectorAll(".caret").forEach(el => el.remove())
 
-    cursors.forEach(({offset, node}) => {
+    cursors.sort(sortById).forEach(({id, offset, node}, index) => {
       let range = document.createRange()
       range.setStart(this.el.childNodes[node], offset)
       let rect = range.getBoundingClientRect()
@@ -76,6 +90,7 @@ Hooks.ContentEditable = {
       div.style.height = `${rect.height}px`
       div.style.left = `${rect.x-1}px`
       div.style.top = `${rect.y}px`
+      div.style.backgroundColor = colors[index % colors.length]
       div.classList.add("caret")
       document.querySelector("body").appendChild(div);
     })
