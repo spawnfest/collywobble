@@ -35,9 +35,29 @@ defmodule Web.PadLive do
   end
 
   @impl Phoenix.LiveView
+  def handle_event("update-cursor", %{"offset" => offset, "node" => node}, socket) do
+    Core.PadServer.set_cursor(socket.assigns.server, offset, node)
+
+    socket
+    |> noreply()
+  end
+
+  @impl Phoenix.LiveView
   def handle_info({:pad_update, text}, socket) do
     socket
     |> push_event("updated-content", %{text: text})
+    |> noreply()
+  end
+
+  @impl Phoenix.LiveView
+  def handle_info({:cursor_update, cursors}, socket) do
+    other_cursors =
+      cursors
+      |> Enum.reject(fn {k, _v} -> k == self() end)
+      |> Enum.map(fn {_k, v} -> v end)
+
+    socket
+    |> push_event("updated-cursors", %{cursors: other_cursors})
     |> noreply()
   end
 end

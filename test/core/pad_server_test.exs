@@ -28,12 +28,25 @@ defmodule Test.Core.PadServerTest do
       assert Core.PadServer.get_text(server) == ""
     end
 
+    test "starts with empty cursors map", %{server: server} do
+      assert Core.PadServer.get_cursors(server) == %{}
+    end
+
     test "sets new text and notifies subscribers", %{pad_id: pad_id, server: server} do
       Phoenix.PubSub.subscribe(Core.PubSub, pad_id)
 
       Core.PadServer.set_text(server, "Test")
       assert Core.PadServer.get_text(server) == "Test"
       assert_receive {:pad_update, "Test"}
+    end
+
+    test "sets new cursor position and notifies subscriber", %{pad_id: pad_id, server: server} do
+      Phoenix.PubSub.subscribe(Core.PubSub, pad_id)
+
+      Core.PadServer.set_cursor(server, 1, 2)
+      pid = self()
+      assert Core.PadServer.get_cursors(server) == %{pid => %{offset: 1, node: 2}}
+      assert_receive {:cursor_update, %{^pid => %{offset: 1, node: 2}}}
     end
   end
 end

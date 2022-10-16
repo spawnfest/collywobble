@@ -26,22 +26,34 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+function getCursorPosition(el) {
+  let sel = window.getSelection()
+  let focusOffset = sel.focusOffset
+  let currentNode = sel.focusNode
+  let currentNodeCount = Array.from(el.childNodes).findIndex((element) => {
+    return element == currentNode
+  })
+
+  return [focusOffset, currentNodeCount]
+}
+
 let Hooks = {}
 Hooks.ContentEditable = {
   sendLocalUpdates(e) {
     this.pushEvent("edit-pad", {text: this.el.innerText})
   },
+  sendCursorUpdates(e) {
+    let [focusOffset, currentNodeCount] = getCursorPosition(this.el)
+    this.pushEvent("update-cursor", {offset: focusOffset, node: currentNodeCount})
+  },
   mounted() {
     this.handleEvent("updated-content", this.updateContent.bind(this))
+    this.handleEvent("updated-cursors", this.updateCursors.bind(this))
     this.el.addEventListener("input", this.sendLocalUpdates.bind(this), false)
+    this.el.addEventListener("click", this.sendCursorUpdates.bind(this), false)
   },
   updateContent({text}) {
-    let sel = window.getSelection()
-    let focusOffset = sel.focusOffset
-    let currentNode = sel.focusNode
-    let currentNodeCount = Array.from(this.el.childNodes).findIndex((element) => {
-      return element == currentNode
-    })
+    let [focusOffset, currentNodeCount] = getCursorPosition(this.el)
 
     this.el.innerText = text
 
@@ -52,6 +64,19 @@ Hooks.ContentEditable = {
     sel = window.getSelection()
     if (sel.rangeCount > 0) sel.removeAllRanges();
     sel.addRange(range)
+  },
+  updateCursors({cursors}) {
+    cursors.forEach(({offset, node}) => {
+      let range = document.createRange()
+      range.setStart(this.el.childNodes[node], offset)
+      let rect = range.getBoundingClientRect()
+      let div = document.createElement("div")
+      div.style.height = `${rect.height}px`
+      div.style.left = `${rect.x-1}px`
+      div.style.top = `${rect.y}px`
+      div.classList.add("caret")
+      document.querySelector("body").appendChild(div);
+    })
   }
 }
 

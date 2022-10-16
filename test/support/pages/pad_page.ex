@@ -28,6 +28,15 @@ defmodule Test.Pages.PadPage do
     Pages.Driver.LiveView.new(page.conn, {:ok, page.live, rendered})
   end
 
+  @spec set_cursor(Pages.Driver.t(), integer(), integer()) :: Pages.Driver.t()
+  def set_cursor(page, offset, node) do
+    rendered =
+      page.live
+      |> Phoenix.LiveViewTest.render_hook("update-cursor", %{offset: offset, node: node})
+
+    Pages.Driver.LiveView.new(page.conn, {:ok, page.live, rendered})
+  end
+
   @spec assert_text(Pages.Driver.t(), binary()) :: Pages.Driver.t()
   def assert_text(page, text) do
     page
@@ -40,6 +49,14 @@ defmodule Test.Pages.PadPage do
   def assert_text_sent_to_client(page, text) do
     page.live
     |> Phoenix.LiveViewTest.assert_push_event("updated-content", %{text: ^text})
+
+    page
+  end
+
+  @spec assert_cursors_sent_to_client(Pages.Driver.t(), [map()]) :: Pages.Driver.t()
+  def assert_cursors_sent_to_client(page, cursors) do
+    page.live
+    |> Phoenix.LiveViewTest.assert_push_event("updated-cursors", %{cursors: ^cursors})
 
     page
   end
