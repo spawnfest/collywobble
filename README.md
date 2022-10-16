@@ -1,7 +1,16 @@
 # Collywobble
 
-Collywobble is an experiment in collaborative editing of content
-using LiveView.
+Collywobble is a LiveView application that syncs state between multiple
+browsers manipulating a `contenteditable` div.
+
+> col·ly·wob·bles
+> /ˈkälēˌwäb(ə)lz/
+>
+> stomach pain or queasiness.
+> "an attack of collywobbles"
+>
+> intense anxiety or nervousness, especially with stomach queasiness.
+> "such organizations give him the collywobbles"
 
 ![Demonstration](screen.gif)
 
