@@ -7,9 +7,6 @@
 # General application configuration
 import Config
 
-config :collywobble,
-  ecto_repos: [Core.Repo]
-
 # Configures the endpoint
 config :collywobble, Web.Endpoint,
   url: [host: "localhost"],

@@ -31,8 +31,7 @@ defmodule Test.ConnCase do
     end
   end
 
-  setup tags do
-    Test.DataCase.setup_sandbox(tags)
+  setup do
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 

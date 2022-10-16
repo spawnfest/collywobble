@@ -6,7 +6,6 @@ defmodule Core.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      Core.Repo,
       Web.Telemetry,
       {Phoenix.PubSub, name: Core.PubSub},
       Web.Endpoint,
