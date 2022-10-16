@@ -3,6 +3,9 @@
 Collywobble is an experiment in collaborative editing of content
 using LiveView.
 
+![Demonstration](screen.gif)
+
+
 ## Usage
 
 This application assumes that `asdf` is used to install Erlang and
