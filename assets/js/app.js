@@ -65,6 +65,7 @@ Hooks.ContentEditable = {
     this.handleEvent("updated-cursors", this.updateCursors.bind(this))
     this.el.addEventListener("input", this.sendLocalUpdates.bind(this), false)
     this.el.addEventListener("click", this.sendCursorUpdates.bind(this), false)
+    this.el.addEventListener("keyup", this.sendCursorUpdates.bind(this), false)
   },
   updateContent({text}) {
     let [focusOffset, currentNodeCount] = getCursorPosition(this.el)
