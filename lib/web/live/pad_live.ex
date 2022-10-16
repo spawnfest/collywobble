@@ -5,7 +5,11 @@ defmodule Web.PadLive do
   def render(assigns) do
     ~H"""
     <div test-pad-id={@pad_id}>
-      <div>this thing: <%= @pad_id %></div>
+      <div>
+        Current text pad:
+        <.link navigate="" test-role="current-page-link"><%= @current_url %></.link>
+        <a href="#" onclick={ "navigator.clipboard.writeText('#{@current_url}')" }><Web.Components.Icons.document_duplicate /></a>
+      </div>
       <div id="editable-content" contenteditable="true" phx-update="ignore" phx-hook="ContentEditable"><%= fetch_text(@server) %></div>
     </div>
     """
@@ -20,7 +24,14 @@ defmodule Web.PadLive do
     push_cursors(socket, server)
 
     socket
-    |> assign(local_id: Core.Random.string(4), page_id: "pad", pad_id: pad_id, server: server, text: fetch_text(server))
+    |> assign(
+      current_url: Routes.pad_url(Web.Endpoint, :pad, pad_id),
+      local_id: Core.Random.string(4),
+      page_id: "pad",
+      pad_id: pad_id,
+      server: server,
+      text: fetch_text(server)
+    )
     |> ok()
   end
 

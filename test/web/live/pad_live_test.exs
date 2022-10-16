@@ -3,6 +3,15 @@ defmodule Web.PadLiveTest do
 
   setup do: [pad_id: Core.Random.string(10)]
 
+  describe "copy link" do
+    @tag page: :alice
+    test "shows a copy link with the current path", %{pad_id: pad_id, pages: %{alice: alice_page}} do
+      alice_page
+      |> Test.Pages.PadPage.visit(pad_id: pad_id)
+      |> Test.Pages.PadPage.assert_copy_link(pad_id: pad_id)
+    end
+  end
+
   describe "pad page" do
     @describetag page: [:alice, :bob]
     test "shows one user's change to other user", %{pad_id: pad_id, pages: %{alice: alice_page, bob: bob_page}} do

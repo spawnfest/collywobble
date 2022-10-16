@@ -19,6 +19,14 @@ defmodule Test.Pages.PadPage do
     |> assert_eq(pad_id, returning: page)
   end
 
+  @spec assert_copy_link(Pages.Driver.t(), pad_id: binary()) :: Pages.Driver.t()
+  def assert_copy_link(page, pad_id: pad_id) do
+    page
+    |> Hq.find!("a[test-role=current-page-link]")
+    |> Hq.text()
+    |> assert_eq("http://localhost:4002/pad/#{pad_id}", returning: page)
+  end
+
   @spec enter_text(Pages.Driver.t(), binary()) :: Pages.Driver.t()
   def enter_text(page, text) do
     rendered =

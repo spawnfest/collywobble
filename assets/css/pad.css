@@ -11,3 +11,9 @@
   width: 2px;
   z-index: -1;
 }
+
+svg {
+  color: black;
+  height: 16px;
+  width: 16px;
+}
