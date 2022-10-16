@@ -86,8 +86,9 @@ Hooks.ContentEditable = {
     let range = document.createRange()
 
     if (currentNodeCount < 0 || currentNodeCount >= this.el.childNodes.length) currentNodeCount = 0
-    range.setStart(this.el.childNodes[currentNodeCount], focusOffset)
-    range.setEnd(this.el.childNodes[currentNodeCount], anchorOffset)
+    let currentNode = this.el.childNodes[currentNodeCount]
+    range.setStart(currentNode, Math.min(focusOffset, currentNode.length))
+    range.setEnd(currentNode, Math.min(anchorOffset, currentNode.length))
 
     sel = window.getSelection()
     if (sel.rangeCount > 0) sel.removeAllRanges();
@@ -103,7 +104,7 @@ Hooks.ContentEditable = {
       let range = document.createRange()
       let ends = [anchor_offset, focus_offset]
 
-      range.setStart(childNode, Math.min(...ends))
+      range.setStart(childNode, Math.min(...ends, childNode.length))
       range.setEnd(childNode, Math.min(Math.max(...ends), childNode.length))
       let rect = range.getBoundingClientRect()
       let div = document.createElement("div")
