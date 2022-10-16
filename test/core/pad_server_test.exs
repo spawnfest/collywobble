@@ -48,5 +48,34 @@ defmodule Test.Core.PadServerTest do
       assert Core.PadServer.get_cursors(server) == %{pid => %{offset: 1, node: 2}}
       assert_receive {:cursor_update, %{^pid => %{offset: 1, node: 2}}}
     end
+
+    test "monitors client processes", %{pad_id: pad_id, server: server} do
+      test_pid = self()
+
+      pid =
+        spawn(fn ->
+          Process.flag(:trap_exit, true)
+          Core.PadServer.set_cursor(server, 2, 3)
+          send(test_pid, :cursors_set)
+
+          receive do
+            _ -> :ok
+          end
+        end)
+
+      assert_receive :cursors_set
+
+      assert Core.PadServer.get_cursors(server) == %{pid => %{offset: 2, node: 3}}
+
+      Phoenix.PubSub.subscribe(Core.PubSub, pad_id)
+
+      Process.monitor(pid)
+      Process.exit(pid, :normal)
+      assert_receive {:DOWN, _ref, :process, _pid, :normal}
+
+      assert Core.PadServer.get_cursors(server) == %{}
+      empty_map = %{}
+      assert_receive {:cursor_update, ^empty_map}
+    end
   end
 end

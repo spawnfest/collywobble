@@ -31,5 +31,26 @@ defmodule Web.PadLiveTest do
       alice_page
       |> Test.Pages.PadPage.assert_cursors_sent_to_client([%{offset: 2, node: 3}])
     end
+
+    test "registers w/ the server and gets notified when other users leave", %{
+      pad_id: pad_id,
+      pages: %{alice: alice_page, bob: bob_page}
+    } do
+      alice_page =
+        alice_page
+        |> Test.Pages.PadPage.visit(pad_id: pad_id)
+        |> Test.Pages.PadPage.enter_text("Hello Bob")
+        |> Test.Pages.PadPage.set_cursor(2, 3)
+
+      bob_page =
+        bob_page
+        |> Test.Pages.PadPage.visit(pad_id: pad_id)
+        |> Test.Pages.PadPage.assert_cursors_sent_to_client([%{offset: 2, node: 3}])
+
+      Process.exit(alice_page.live.pid, :kill)
+
+      bob_page
+      |> Test.Pages.PadPage.assert_cursors_sent_to_client([])
+    end
   end
 end

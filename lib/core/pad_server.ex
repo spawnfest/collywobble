@@ -62,6 +62,16 @@ defmodule Core.PadServer do
   def handle_call({:set_cursor, view_pid, offset, node}, _from, state) do
     new_cursors = state.cursors |> Map.put(view_pid, %{offset: offset, node: node})
     Phoenix.PubSub.broadcast(Core.PubSub, state.pad_id, {:cursor_update, new_cursors})
+
+    Process.monitor(view_pid)
+
     {:reply, :ok, %{state | cursors: new_cursors}}
+  end
+
+  @impl true
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
+    new_cursors = state.cursors |> Map.delete(pid)
+    Phoenix.PubSub.broadcast(Core.PubSub, state.pad_id, {:cursor_update, new_cursors})
+    {:noreply, %{state | cursors: new_cursors}}
   end
 end

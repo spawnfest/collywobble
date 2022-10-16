@@ -66,6 +66,8 @@ Hooks.ContentEditable = {
     sel.addRange(range)
   },
   updateCursors({cursors}) {
+    document.querySelectorAll(".caret").forEach(el => el.remove())
+
     cursors.forEach(({offset, node}) => {
       let range = document.createRange()
       range.setStart(this.el.childNodes[node], offset)

@@ -5,14 +5,25 @@ defmodule Web.PadLive do
     Core.PadServer.get_text(server)
   end
 
+  def fetch_cursors(server) do
+    Core.PadServer.get_cursors(server)
+  end
+
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
     <div test-pad-id={@pad_id}>
       <div>this thing: <%= @pad_id %></div>
       <div id="editable-content" contenteditable="true" phx-update="ignore" phx-hook="ContentEditable"><%= fetch_text(@server) %></div>
+      <.link navigate={Routes.home_path(Web.Endpoint, :home)}>go back</.link>
     </div>
     """
+  end
+
+  def push_cursors(socket, server) do
+    if connected?(socket) do
+      send(self(), {:cursor_update, fetch_cursors(server)})
+    end
   end
 
   @impl Phoenix.LiveView
@@ -20,6 +31,8 @@ defmodule Web.PadLive do
     server = Core.PadServer.pid_for_pad_id(pad_id)
 
     Phoenix.PubSub.subscribe(Core.PubSub, pad_id)
+
+    push_cursors(socket, server)
 
     socket
     |> assign(page_id: "pad", pad_id: pad_id, server: server, text: fetch_text(server))
