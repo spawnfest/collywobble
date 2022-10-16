@@ -38,13 +38,14 @@ const colors = [
 
 function getCursorPosition(el) {
   let sel = window.getSelection()
+  let anchorOffset = sel.anchorOffset
   let focusOffset = sel.focusOffset
   let currentNode = sel.focusNode
   let currentNodeCount = Array.from(el.childNodes).findIndex((element) => {
     return element == currentNode
   })
 
-  return [focusOffset, currentNodeCount]
+  return [anchorOffset, focusOffset, currentNodeCount]
 }
 
 function sortById(a, b) {
@@ -57,8 +58,8 @@ Hooks.ContentEditable = {
     this.pushEvent("edit-pad", {text: this.el.innerText})
   },
   sendCursorUpdates(e) {
-    let [focusOffset, currentNodeCount] = getCursorPosition(this.el)
-    this.pushEvent("update-cursor", {offset: focusOffset, node: currentNodeCount})
+    let [anchorOffset, focusOffset, currentNodeCount] = getCursorPosition(this.el)
+    this.pushEvent("update-cursor", {anchor_offset: anchorOffset, focus_offset: focusOffset, node: currentNodeCount})
   },
   mounted() {
     this.handleEvent("updated-content", this.updateContent.bind(this))
@@ -68,13 +69,13 @@ Hooks.ContentEditable = {
     this.el.addEventListener("keyup", this.sendCursorUpdates.bind(this), false)
   },
   updateContent({text}) {
-    let [focusOffset, currentNodeCount] = getCursorPosition(this.el)
+    let [anchorOffset, focusOffset, currentNodeCount] = getCursorPosition(this.el)
 
     this.el.innerText = text
 
     let range = document.createRange()
     range.setStart(this.el.childNodes[currentNodeCount], focusOffset)
-    range.collapse(true)
+    range.setEnd(this.el.childNodes[currentNodeCount], anchorOffset)
 
     sel = window.getSelection()
     if (sel.rangeCount > 0) sel.removeAllRanges();
@@ -83,12 +84,15 @@ Hooks.ContentEditable = {
   updateCursors({cursors}) {
     document.querySelectorAll(".caret").forEach(el => el.remove())
 
-    cursors.sort(sortById).forEach(({id, offset, node}, index) => {
+    cursors.sort(sortById).forEach(({id, anchor_offset, focus_offset, node}, index) => {
       let range = document.createRange()
-      range.setStart(this.el.childNodes[node], offset)
+      let ends = [anchor_offset, focus_offset]
+      range.setStart(this.el.childNodes[node], Math.min(...ends))
+      range.setEnd(this.el.childNodes[node], Math.max(...ends))
       let rect = range.getBoundingClientRect()
       let div = document.createElement("div")
       div.style.height = `${rect.height}px`
+      div.style.width = `${rect.width+1}px`
       div.style.left = `${rect.x-1}px`
       div.style.top = `${rect.y}px`
       div.style.backgroundColor = colors[index % colors.length]

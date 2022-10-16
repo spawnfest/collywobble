@@ -34,8 +34,12 @@ defmodule Web.PadLive do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("update-cursor", %{"offset" => offset, "node" => node}, socket) do
-    Core.PadServer.set_cursor(socket.assigns.server, socket.assigns.local_id, offset, node)
+  def handle_event(
+        "update-cursor",
+        %{"anchor_offset" => anchor_offset, "focus_offset" => focus_offset, "node" => node},
+        socket
+      ) do
+    Core.PadServer.set_cursor(socket.assigns.server, socket.assigns.local_id, anchor_offset, focus_offset, node)
 
     socket
     |> noreply()
